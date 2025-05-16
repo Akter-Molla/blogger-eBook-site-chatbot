@@ -1,0 +1,609 @@
+<link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css' rel='stylesheet'/>
+<style>
+    /* Basic styles for the chat widget */
+    #chat-widget {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        width: 350px;
+        background-color: #f1f1f1;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        display: none;
+        z-index: 1000;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #chat-header {
+        background-color: #007bff;
+        color: #fff;
+        padding: 12px;
+        font-size: 18px;
+        border-radius: 10px 10px 0 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    #chat-body {
+        height: 350px;
+        overflow-y: auto;
+        padding: 10px;
+        background-color: #fff;
+    }
+    #chat-footer {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-top: 1px solid #ddd;
+        border-radius: 0 0 10px 10px;
+    }
+    #chat-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        outline: none;
+        margin-right: 8px;
+    }
+    #chat-send {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    #chat-send:hover {
+        background-color: #0056b3;
+    }
+    #user-info-form {
+        padding: 15px;
+        background-color: #fff;
+    }
+    #user-info-form input, #user-info-form select {
+        width: calc(100% - 22px);
+        margin: 8px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    #user-info-form button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background-color 0.3s;
+    }
+    #user-info-form button:hover {
+        background-color: #0056b3;
+    }
+    .welcome-message {
+        font-size: 16px;
+        color: #007bff;
+        margin-bottom: 10px;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+    }
+    #toggle-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1001;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s;
+    }
+    #toggle-button:hover {
+        transform: scale(1.1);
+    }
+    #toggle-button i {
+        font-size: 24px;
+    }
+    .chat-message {
+        margin: 10px 0;
+        display: flex;
+        align-items: flex-start;
+    }
+    .chat-message.user {
+        justify-content: flex-end;
+    }
+    .chat-message.bot {
+        justify-content: flex-start;
+    }
+    .message-content {
+        max-width: 80%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        position: relative;
+        word-wrap: break-word;
+    }
+    .user .message-content {
+        background-color: #007bff;
+        color: white;
+        border-top-right-radius: 0;
+    }
+    .bot .message-content {
+        background-color: #e9ecef;
+        color: #333;
+        border-top-left-radius: 0;
+    }
+    .message-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        margin: 0 8px;
+        object-fit: cover;
+        background-color: #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: white;
+    }
+    .user .message-icon {
+        background-color: #4CAF50;
+    }
+    .bot .message-icon {
+        background-color: #007bff;
+    }
+    .message-time {
+        font-size: 10px;
+        color: #999;
+        margin-top: 4px;
+        text-align: right;
+    }
+    .book-result {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        margin: 10px 0;
+        background-color: #f9f9f9;
+    }
+    .book-title {
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    .book-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin: 5px 0;
+    }
+    .book-link {
+        display: inline-block;
+        margin-top: 5px;
+        color: #28a745;
+        text-decoration: none;
+    }
+    .book-link:hover {
+        text-decoration: underline;
+    }
+    #clear-chat {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 12px;
+        transition: background-color 0.3s;
+    }
+    #clear-chat:hover {
+        background-color: #c82333;
+    }
+    .typing-indicator {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #e9ecef;
+        border-radius: 15px;
+        font-size: 12px;
+        color: #666;
+        margin-left: 46px;
+    }
+    .typing-dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background-color: #666;
+        border-radius: 50%;
+        margin: 0 2px;
+        animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(1) {
+        animation-delay: 0s;
+    }
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    @keyframes typingAnimation {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-5px); }
+    }
+</style>
+
+<!-- Chat Widget HTML -->
+<div id='chat-widget'>
+    <div id='chat-header'>
+        <div>
+            <i class='fas fa-comments'></i> দরিল হোকমাহ পাঠাগার
+        </div>
+        <button id='clear-chat' title="Clear conversation"><i class='fas fa-trash'></i></button>
+    </div>
+    <div id='chat-body'>
+        <div class='welcome-message'>আসসালাম আলাইকুম, চ্যাট শুরু করতে আপনার নাম ও ইমেইল প্রদান করুন অথবা নামহীন চ্যাট করতে এনোনিমাস বাটনে ক্লিক করুন ধন্যবাদ</div>
+    </div>
+    <div id='chat-footer' style='display:none'>
+        <input id='chat-input' placeholder='এখানে আপনার বার্তা লিখুন...' type='text'/>
+        <button id='chat-send'><i class='fas fa-paper-plane'></i></button>
+    </div>
+    <div id='user-info-form'>
+        <input id='input-name' placeholder='আপনার নাম' type='text'/>
+        <input id='input-email' placeholder='আপনার ইমেইল' type='email'/>
+        <select id='input-age'>
+            <option value=''>আপনার বয়স নির্বাচন করুন</option>
+            <option value='10-18'>10-18</option>
+            <option value='19-25'>19-25</option>
+            <option value='26-35'>26-35</option>
+            <option value='36-45'>36-45</option>
+            <option value='46+'>46+</option>
+        </select>
+        <button id='start-chat'><i class='fas fa-comment'></i> চ্যাট শুরু করুন</button>
+        <button id='start-anonymous-chat'><i class='fas fa-user-secret'></i> নামহীন চ্যাট</button>
+    </div>
+</div>
+
+<!-- Toggle Button -->
+<button id='toggle-button'><i class='fas fa-comment-dots'></i></button>
+
+<script>
+    const chatWidget = document.getElementById('chat-widget');
+    const chatBody = document.getElementById('chat-body');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    const toggleButton = document.getElementById('toggle-button');
+    const userInfoForm = document.getElementById('user-info-form');
+    const inputName = document.getElementById('input-name');
+    const inputEmail = document.getElementById('input-email');
+    const inputAge = document.getElementById('input-age');
+    const startChatButton = document.getElementById('start-chat');
+    const startAnonymousChatButton = document.getElementById('start-anonymous-chat');
+    const clearChatButton = document.getElementById('clear-chat');
+
+    let userName = null;
+    let userAge = null;
+    const posts = [];
+    let isTyping = false;
+
+    // Sample book database (replace with your actual book data)
+    const bookDatabase = [
+        {
+            title: "আরবি ভাষা শিক্ষা",
+            author: "মুহাম্মদ আব্দুল্লাহ",
+            image: "https://via.placeholder.com/150x200?text=আরবি+ভাষা+শিক্ষা",
+            link: "https://example.com/book1",
+            keywords: ["আরবি", "ভাষা", "শিক্ষা", "গ্রামার"]
+        },
+        {
+            title: "ইসলামের মূলনীতি",
+            author: "ড. জাকির নায়েক",
+            image: "https://via.placeholder.com/150x200?text=ইসলামের+মূলনীতি",
+            link: "https://example.com/book2",
+            keywords: ["ইসলাম", "মূলনীতি", "ধর্ম", "জাকির"]
+        },
+        {
+            title: "বাংলাদেশের ইতিহাস",
+            author: "ড. মাহবুবুর রহমান",
+            image: "https://via.placeholder.com/150x200?text=বাংলাদেশের+ইতিহাস",
+            link: "https://example.com/book3",
+            keywords: ["বাংলাদেশ", "ইতিহাস", "মুক্তিযুদ্ধ"]
+        },
+        {
+            title: "প্রোগ্রামিং এর basics",
+            author: "আহমেদ রাফি",
+            image: "https://via.placeholder.com/150x200?text=প্রোগ্রামিং+Basics",
+            link: "https://example.com/book4",
+            keywords: ["প্রোগ্রামিং", "কম্পিউটার", "কোডিং", "জাভাস্ক্রিপ্ট"]
+        }
+    ];
+
+    function fetchPosts() {
+        fetch('https://dhpathager.blogspot.com/feeds/posts/default?alt=json')
+            .then(response => response.json())
+            .then(data => {
+                const entries = data.feed.entry;
+                entries.forEach(entry => {
+                    posts.push({
+                        title: entry.title.$t,
+                        link: entry.link.find(link => link.rel === 'alternate').href,
+                        content: entry.content.$t,
+                        categories: entry.category.map(category => category.term.toLowerCase())
+                    });
+                });
+            })
+            .catch(error => console.error('Error fetching posts:', error));
+    }
+
+    function addMessage(who, message, isHTML = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${who}`;
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'message-icon';
+        iconDiv.innerHTML = who === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        if (isHTML) {
+            contentDiv.innerHTML = message;
+        } else {
+            contentDiv.textContent = message;
+        }
+        
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        timeDiv.textContent = getCurrentTime();
+        
+        messageDiv.appendChild(iconDiv);
+        messageDiv.appendChild(contentDiv);
+        chatBody.appendChild(messageDiv);
+        chatBody.appendChild(timeDiv);
+        
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        if (isTyping) return;
+        
+        isTyping = true;
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.id = 'typing-indicator';
+        typingDiv.innerHTML = `
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+        `;
+        chatBody.appendChild(typingDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        isTyping = false;
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+
+    function typeMessage(who, message, callback) {
+        let i = 0;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${who}`;
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'message-icon';
+        iconDiv.innerHTML = who === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        
+        messageDiv.appendChild(iconDiv);
+        messageDiv.appendChild(contentDiv);
+        chatBody.appendChild(messageDiv);
+        
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        
+        function typingEffect() {
+            if (i < message.length) {
+                contentDiv.textContent += message.charAt(i);
+                i++;
+                chatBody.scrollTop = chatBody.scrollHeight;
+                setTimeout(typingEffect, 20 + Math.random() * 30);
+            } else {
+                chatBody.appendChild(timeDiv);
+                timeDiv.textContent = getCurrentTime();
+                if (callback) callback();
+            }
+        }
+        
+        typingEffect();
+    }
+
+    function getCurrentTime() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        return `${hours}:${minutes} ${ampm}`;
+    }
+
+    function findBooksByKeyword(keyword) {
+        const results = [];
+        const lowerKeyword = keyword.toLowerCase();
+        
+        // Search in book database
+        bookDatabase.forEach(book => {
+            if (book.title.toLowerCase().includes(lowerKeyword) || 
+                book.author.toLowerCase().includes(lowerKeyword) ||
+                book.keywords.some(kw => kw.toLowerCase().includes(lowerKeyword))) {
+                results.push(book);
+            }
+        });
+        
+        // Search in blog posts
+        posts.forEach(post => {
+            if (post.title.toLowerCase().includes(lowerKeyword) || 
+                post.content.toLowerCase().includes(lowerKeyword) ||
+                post.categories.some(cat => cat.includes(lowerKeyword))) {
+                results.push({
+                    title: post.title,
+                    author: "পাঠাগার ব্লগ",
+                    image: "https://via.placeholder.com/150x200?text=পাঠাগার+ব্লগ",
+                    link: post.link,
+                    keywords: post.categories
+                });
+            }
+        });
+        
+        return results;
+    }
+
+    function formatBookResponse(books) {
+        if (books.length === 0) {
+            return "দুঃখিত, আপনার অনুসন্ধানের সাথে মিলে এমন কোনো বই খুঁজে পাইনি। অনুগ্রহ করে অন্য কোনো শব্দ দিয়ে চেষ্টা করুন।";
+        }
+        
+        let response = `<p>আপনার অনুসন্ধানের সাথে মিলে এমন ${books.length}টি বই পেয়েছি:</p>`;
+        
+        books.forEach((book, index) => {
+            response += `
+                <div class="book-result">
+                    <div class="book-title">${index + 1}. ${book.title}</div>
+                    <div>লেখক: ${book.author}</div>
+                    ${book.image ? `<img src="${book.image}" class="book-image" alt="${book.title}">` : ''}
+                    <a href="${book.link}" target="_blank" class="book-link">বইটি দেখুন</a>
+                </div>
+            `;
+        });
+        
+        return response;
+    }
+
+    function getResponse(userInput) {
+        const inputWords = userInput.toLowerCase().split(/\s+/);
+        
+        // Check for greetings
+        if (inputWords.some(word => ['হ্যালো', 'hello', 'hi', 'হাই', 'আসসালাম'].includes(word))) {
+            return "আসসালাম আলাইকুম! দরিল হোকমাহ পাঠাগারে আপনাকে স্বাগতম। আপনি কোন বই সম্পর্কে জানতে চান?";
+        }
+        
+        // Check for thanks
+        if (inputWords.some(word => ['ধন্যবাদ', 'thank', 'thanks'].includes(word))) {
+            return "আপনাকে ধন্যবাদ! আপনার সেবায় আমরা সর্বদা প্রস্তুত।";
+        }
+        
+        // Find books by keyword
+        const books = findBooksByKeyword(userInput);
+        if (books.length > 0) {
+            return formatBookResponse(books);
+        }
+        
+        // Default response
+        return "আমি আপনার প্রশ্নটি পুরোপুরি বুঝতে পারিনি। অনুগ্রহ করে বইয়ের নাম, লেখক বা বিষয়বস্তু সম্পর্কে জানান।";
+    }
+
+    function sendMessage() {
+        const userInput = chatInput.value.trim();
+        if (userInput) {
+            const displayName = userName ? userName : 'অতিথি';
+            addMessage('user', `${userInput}`);
+            
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                const response = getResponse(userInput);
+                typeMessage('bot', response.includes('<') ? '' : response, () => {
+                    if (response.includes('<')) {
+                        const lastBotMessage = document.querySelectorAll('.chat-message.bot').slice(-1)[0];
+                        const contentDiv = lastBotMessage.querySelector('.message-content');
+                        contentDiv.innerHTML = response;
+                    }
+                });
+            }, 1000);
+            
+            chatInput.value = '';
+        }
+    }
+
+    chatSend.addEventListener('click', sendMessage);
+
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    startChatButton.addEventListener('click', () => {
+        userName = inputName.value.trim();
+        const userEmail = inputEmail.value.trim();
+        userAge = inputAge.value;
+        
+        if (userName && userEmail) {
+            userInfoForm.style.display = 'none';
+            document.getElementById('chat-footer').style.display = 'flex';
+            
+            let greeting = `আসসালাম আলাইকুম ${userName}!`;
+            if (userAge) {
+                greeting += ` (বয়স: ${userAge})`;
+            }
+            greeting += " দরিল হোকমাহ পাঠাগারে আপনাকে স্বাগতম। আপনি কোন বই সম্পর্কে জানতে চান?";
+            
+            typeMessage('bot', greeting);
+            sessionStorage.setItem('formSubmitted', 'true');
+        } else {
+            alert('দয়া করে আপনার নাম এবং ইমেইল প্রদান করুন।');
+        }
+    });
+
+    startAnonymousChatButton.addEventListener('click', () => {
+        userName = 'অতিথি';
+        userInfoForm.style.display = 'none';
+        document.getElementById('chat-footer').style.display = 'flex';
+        typeMessage('bot', 'আসসালাম আলাইকুম অতিথি! দরিল হোকমাহ পাঠাগারে আপনাকে স্বাগতম। আপনি কোন বই সম্পর্কে জানতে চান?');
+        sessionStorage.setItem('formSubmitted', 'true');
+    });
+
+    clearChatButton.addEventListener('click', () => {
+        if (confirm('আপনি কি নিশ্চিত যে আপনি এই কথোপকথন মুছে ফেলতে চান?')) {
+            chatBody.innerHTML = '';
+            const welcomeMsg = document.createElement('div');
+            welcomeMsg.className = 'welcome-message';
+            welcomeMsg.textContent = 'চ্যাট পুনরায় শুরু হয়েছে। আপনি কীভাবে সাহায্য চান?';
+            chatBody.appendChild(welcomeMsg);
+        }
+    });
+
+    toggleButton.addEventListener('click', () => {
+        if (sessionStorage.getItem('formSubmitted') === 'true') {
+            chatWidget.style.display = chatWidget.style.display === 'none' ? 'block' : 'none';
+        } else {
+            chatWidget.style.display = chatWidget.style.display === 'none' ? 'block' : 'none';
+            if (chatWidget.style.display === 'block') {
+                document.getElementById('chat-footer').style.display = 'none';
+                userInfoForm.style.display = 'block';
+                inputName.value = '';
+                inputEmail.value = '';
+                inputAge.value = '';
+            }
+        }
+    });
+
+    // Initialize
+    fetchPosts();
+</script>
